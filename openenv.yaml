@@ -1,0 +1,95 @@
+name: codesentinel
+version: 1.0.0
+description: >
+  CodeSentinel is a production-grade AI training environment for automated
+  code review and security auditing. Agents observe realistic Python codebases
+  and must act as senior software engineers: flagging bugs, identifying OWASP
+  vulnerabilities, and producing structured architecture reports. Every step
+  returns a dense reward signal to accelerate learning. Three tasks span
+  difficulty from easy bug detection to hard multi-file architecture review.
+author: CodeSentinel Team
+license: MIT
+tags:
+  - openenv
+  - real-world
+  - code-review
+  - security
+  - software-engineering
+  - llm-agent
+
+tasks:
+  - id: bug_detection
+    name: "Bug Detection"
+    difficulty: easy
+    description: >
+      Review a Python user service and identify exactly 5 logical bugs.
+      Bugs include a missing KeyError handler, an off-by-one in range(),
+      use of MD5 for password hashing, a wrong operator (== vs =), and
+      a ZeroDivisionError on an empty list.
+    max_steps: 20
+    timeout_seconds: 120
+
+  - id: security_audit
+    name: "Security Audit"
+    difficulty: medium
+    description: >
+      Perform a security audit of a Flask web application and identify
+      7 OWASP Top-10 vulnerabilities: hardcoded secret key (A07),
+      hardcoded DB password (A02), SQL injection (A03), reflected XSS (A03),
+      IDOR (A01), unrestricted file upload (A04), and debug mode enabled (A05).
+    max_steps: 30
+    timeout_seconds: 240
+
+  - id: architecture_review
+    name: "Architecture Review"
+    difficulty: hard
+    description: >
+      Review a 4-file microservice codebase (payment_service, inventory_service,
+      router, settings) and produce a structured JSON report covering issues in
+      security, reliability, api_design, observability, and scalability.
+    max_steps: 50
+    timeout_seconds: 480
+
+observation:
+  type: object
+  fields:
+    task_id: {type: string, description: "Task identifier"}
+    task_description: {type: string, description: "Natural language task brief"}
+    files: {type: array, items: CodeFile, description: "Source files to review"}
+    history: {type: array, items: ReviewComment, description: "Previous actions"}
+    step: {type: integer, description: "Current step number"}
+    max_steps: {type: integer, description: "Maximum allowed steps"}
+    done: {type: boolean, description: "Episode completion flag"}
+    hint: {type: string, nullable: true, description: "Optional task hint"}
+
+action:
+  type: object
+  fields:
+    action_type:
+      type: string
+      enum: [add_comment, flag_bug, flag_vulnerability, suggest_fix, request_changes, approve, submit_report]
+    line: {type: integer, nullable: true, description: "Source line number"}
+    filename: {type: string, nullable: true}
+    message: {type: string, nullable: true}
+    severity: {type: string, enum: [low, medium, high, critical], nullable: true}
+    cve_category: {type: string, nullable: true, description: "OWASP category e.g. A03_Injection"}
+    original_code: {type: string, nullable: true}
+    suggested_code: {type: string, nullable: true}
+    report: {type: object, nullable: true, description: "Architecture report dict"}
+    reason: {type: string, nullable: true}
+
+reward:
+  type: float
+  range: [0.0, 1.0]
+  description: >
+    Non-sparse step reward combining coverage, precision, severity_match,
+    report_quality, efficiency, and a false-positive penalty. Terminal reward
+    is grader.final_score() minus a 0.005-per-step efficiency penalty.
+
+api:
+  base_url: "http://localhost:7860"
+  endpoints:
+    validate: GET /validate
+    reset: POST /reset
+    step: POST /step
+    state: GET /state
