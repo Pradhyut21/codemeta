@@ -1,3 +1,11 @@
+---
+title: CodeSentinel OpenEnv
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
 # 🛡️ CodeSentinel
 
 **A real-world AI training environment for automated code review and security auditing.**
