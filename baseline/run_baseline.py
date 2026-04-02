@@ -76,7 +76,7 @@ def run_task(client: OpenAI, task_id: str, seed: int = 42) -> float:
     print(f"{'='*60}")
 
     reset_resp = _post(f"{BASE_URL}/reset", {"task_id": task_id, "seed": seed})
-    obs        = reset_resp["observation"]
+    obs        = reset_resp
     messages   = [{"role": "system", "content": SYSTEM_PROMPT}]
     final_score = 0.0
 

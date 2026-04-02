@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -5,7 +6,7 @@ from pydantic import BaseModel
 from environment.env    import CodeSentinelEnv
 from environment.models import (
     Action, TaskId, StepResponse, ResetResponse,
-    EnvironmentState, ValidateResponse,
+    EnvironmentState, ValidateResponse, Observation
 )
 
 app = FastAPI(
@@ -75,10 +76,13 @@ def validate():
     )
 
 
-@app.post("/reset", response_model=ResetResponse)
-def reset(req: ResetRequest):
+@app.post("/reset", response_model=Observation)
+def reset(req: Optional[ResetRequest] = None):
+    if req is None:
+        req = ResetRequest()
     try:
-        return env.reset(task_id=req.task_id, seed=req.seed)
+        resp = env.reset(task_id=req.task_id, seed=req.seed)
+        return resp.observation
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

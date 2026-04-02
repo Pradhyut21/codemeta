@@ -26,7 +26,7 @@ print(f"VALIDATE: {v['message']}")
 
 # 2. Bug detection
 r1 = post("/reset", {"task_id": "bug_detection", "seed": 42})
-obs = r1["observation"]
+obs = r1
 print(f"RESET bug_detection: step={obs['step']} max={obs['max_steps']} files={len(obs['files'])}")
 assert obs["step"] == 0 and obs["max_steps"] == 20
 
@@ -60,7 +60,7 @@ except urllib.error.HTTPError as e:
 
 # 3. Security audit
 r2 = post("/reset", {"task_id": "security_audit", "seed": 42})
-obs2 = r2["observation"]
+obs2 = r2
 print(f"RESET security_audit: files={len(obs2['files'])} max={obs2['max_steps']}")
 assert obs2["max_steps"] == 30
 
@@ -76,7 +76,7 @@ assert s_sec["reward"]["value"] >= 0
 
 # 4. Architecture review
 r3 = post("/reset", {"task_id": "architecture_review", "seed": 42})
-obs3 = r3["observation"]
+obs3 = r3
 print(f"RESET architecture_review: files={len(obs3['files'])} max={obs3['max_steps']}")
 assert obs3["max_steps"] == 50 and len(obs3["files"]) == 4
 
