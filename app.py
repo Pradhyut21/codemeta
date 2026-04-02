@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
@@ -77,7 +77,7 @@ def validate():
 
 
 @app.post("/reset", response_model=Observation)
-def reset(req: Optional[ResetRequest] = None):
+def reset(req: Optional[ResetRequest] = Body(None)):
     if req is None:
         req = ResetRequest()
     try:
