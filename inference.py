@@ -80,13 +80,15 @@ def run_task(client: OpenAI, task_id: str, seed: int = 42) -> float:
     print(f"\n{'='*60}")
     print(f"  Task: {task_id.upper()}")
     print(f"{'='*60}")
+    print(f"[START] task={task_id}", flush=True)
 
     reset_resp = _post(f"{BASE_URL}/reset", {"task_id": task_id, "seed": seed})
     obs        = reset_resp
     messages   = [{"role": "system", "content": SYSTEM_PROMPT}]
     final_score = 0.0
+    step_index = 0
 
-    for _ in range(obs["max_steps"]):
+    for step_index in range(obs["max_steps"]):
         messages.append({"role": "user", "content": obs_to_prompt(obs)})
 
         try:
@@ -116,11 +118,13 @@ def run_task(client: OpenAI, task_id: str, seed: int = 42) -> float:
         done        = step_resp["done"]
         final_score = step_resp["info"].get("final_score") or reward["value"]
 
+        print(f"[STEP] step={step_index + 1} reward={reward['value']:.3f}", flush=True)
         print(f"         reward={reward['value']:.3f}  delta={reward['delta']:+.3f}  done={done}")
         if done:
             break
 
     print(f"\n  FINAL SCORE: {final_score:.4f}")
+    print(f"[END] task={task_id} score={final_score:.4f} steps={step_index + 1}", flush=True)
     return final_score or 0.0
 
 
