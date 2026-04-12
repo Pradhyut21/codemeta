@@ -148,9 +148,13 @@ def main():
         print(f"ERROR: Server at {BASE_URL} is unreachable: {e}", file=sys.stderr)
         return
 
-    api_key = os.environ.get("OPENAI_API_KEY", "dummy_key_for_validation")
+    api_key = os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY", "dummy_key_for_validation")
+    api_base_url = os.environ.get("API_BASE_URL")
 
-    client = OpenAI(api_key=api_key)
+    if api_base_url:
+        client = OpenAI(api_key=api_key, base_url=api_base_url)
+    else:
+        client = OpenAI(api_key=api_key)
     tasks  = ["bug_detection", "security_audit", "architecture_review"]
     scores = {}
 
