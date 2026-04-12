@@ -36,21 +36,27 @@ Respond with exactly ONE JSON action per turn. No prose, no markdown fences.
 
 
 def _post(url: str, data: dict) -> dict:
-    body = json.dumps(data).encode()
-    if httpx:
-        return httpx.post(url, content=body, headers={"Content-Type": "application/json"}).json()
-    req = __import__("urllib.request").request.Request(
-        url, data=body, headers={"Content-Type": "application/json"}, method="POST"
-    )
-    with __import__("urllib.request").request.urlopen(req) as r:
-        return json.loads(r.read())
+    try:
+        body = json.dumps(data).encode()
+        if httpx:
+            return httpx.post(url, content=body, headers={"Content-Type": "application/json"}).json()
+        req = __import__("urllib.request").request.Request(
+            url, data=body, headers={"Content-Type": "application/json"}, method="POST"
+        )
+        with __import__("urllib.request").request.urlopen(req) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        raise RuntimeError(f"Network/parsing error in _post to {url}: {e}")
 
 
 def _get(url: str) -> dict:
-    if httpx:
-        return httpx.get(url).json()
-    with __import__("urllib.request").request.urlopen(url) as r:
-        return json.loads(r.read())
+    try:
+        if httpx:
+            return httpx.get(url).json()
+        with __import__("urllib.request").request.urlopen(url) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        raise RuntimeError(f"Network/parsing error in _get from {url}: {e}")
 
 
 def obs_to_prompt(obs: dict) -> str:
@@ -119,13 +125,19 @@ def ascii_bar(score: float, width: int = 20) -> str:
 
 
 def main():
+    global BASE_URL
     parser = argparse.ArgumentParser(description="CodeSentinel GPT-4o baseline")
     parser.add_argument("--base-url", default=BASE_URL)
     parser.add_argument("--seed",     type=int, default=42)
     args = parser.parse_args()
 
-    global BASE_URL
     BASE_URL = args.base_url
+
+    try:
+        _get(f"{BASE_URL}/validate")
+    except Exception as e:
+        print(f"ERROR: Server at {BASE_URL} is unreachable: {e}", file=sys.stderr)
+        return
 
     api_key = os.environ.get("OPENAI_API_KEY", "")
     if not api_key:
