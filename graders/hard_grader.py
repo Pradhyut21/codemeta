@@ -87,7 +87,7 @@ class HardGrader(BaseGrader):
             total += f1 * weight
 
         bonus = 0.1 if all_cats else 0.0
-        return min(1.0, total + bonus)
+        return min(0.999, total + bonus)
 
     def score_action(self, action: Action) -> RewardBreakdown:
         self.step_count += 1
@@ -111,6 +111,6 @@ class HardGrader(BaseGrader):
 
     def final_score(self) -> float:
         if not self.report_submitted:
-            return min(len(self.intermediate_flags) / 30.0, 0.25)
-        return self.report_score
+            return max(0.001, min(len(self.intermediate_flags) / 30.0, 0.25))
+        return max(0.001, min(0.999, self.report_score))
 

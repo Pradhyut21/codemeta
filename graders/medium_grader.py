@@ -66,11 +66,11 @@ class MediumGrader(BaseGrader):
 
     def final_score(self) -> float:
         if self.approved_vulnerable:
-            return 0.0
+            return 0.001
         max_weighted = sum(OWASP_WEIGHTS.get(v["category"], 1.0) for v in self.vulns)
         recall    = self.weighted_hits / max(max_weighted, 1)
         precision = len(self.found_ids) / max(len(self.found_ids) + self.false_positives, 1)
         if precision + recall < 1e-9:
-            return 0.0
+            return 0.001
         f1 = 2 * precision * recall / (precision + recall)
-        return max(0.0, min(1.0, f1 - min(self.false_positives * 0.05, 0.25)))
+        return max(0.001, min(0.999, f1 - min(self.false_positives * 0.05, 0.25)))

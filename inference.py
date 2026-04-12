@@ -125,7 +125,7 @@ def run_task(client: OpenAI, task_id: str, seed: int = 42) -> float:
 
     print(f"\n  FINAL SCORE: {final_score:.4f}")
     print(f"[END] task={task_id} score={final_score:.4f} steps={step_index + 1}", flush=True)
-    return final_score or 0.0
+    return final_score or 0.001
 
 
 def ascii_bar(score: float, width: int = 20) -> str:
@@ -163,7 +163,7 @@ def main():
             scores[task_id] = run_task(client, task_id, seed=args.seed)
         except Exception as exc:
             print(f"  [ERROR] {exc}")
-            scores[task_id] = 0.0
+            scores[task_id] = 0.001
 
     print(f"\n{'='*60}")
     print("  BASELINE RESULTS")

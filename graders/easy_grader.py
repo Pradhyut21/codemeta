@@ -67,4 +67,4 @@ class EasyGrader(BaseGrader):
         fp_penalty = min(self.false_positives * 0.05, 0.3)
         efficiency = 0.1 if (len(self.found_ids) == self.total and self.step_count <= 10) else 0.0
         score = (0.5 * coverage + 0.25 * precision + 0.15 * sev_bonus + 0.1 * efficiency - fp_penalty)
-        return max(0.0, min(1.0, score))
+        return max(0.001, min(0.999, score))
