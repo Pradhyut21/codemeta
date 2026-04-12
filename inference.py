@@ -89,13 +89,18 @@ def run_task(client: OpenAI, task_id: str, seed: int = 42) -> float:
     for _ in range(obs["max_steps"]):
         messages.append({"role": "user", "content": obs_to_prompt(obs)})
 
-        completion = client.chat.completions.create(
-            model       = "gpt-4o",
-            messages    = messages,
-            temperature = 0.0,
-            max_tokens  = 512,
-        )
-        raw_action = completion.choices[0].message.content.strip()
+        try:
+            completion = client.chat.completions.create(
+                model       = "gpt-4o",
+                messages    = messages,
+                temperature = 0.0,
+                max_tokens  = 512,
+            )
+            raw_action = completion.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"  [ERROR] LLM generation failed: {e}")
+            break
+
         print(f"  Step {obs['step']+1}: {raw_action[:100]}")
         messages.append({"role": "assistant", "content": raw_action})
 
@@ -139,10 +144,7 @@ def main():
         print(f"ERROR: Server at {BASE_URL} is unreachable: {e}", file=sys.stderr)
         return
 
-    api_key = os.environ.get("OPENAI_API_KEY", "")
-    if not api_key:
-        print("ERROR: Set OPENAI_API_KEY environment variable.", file=sys.stderr)
-        return
+    api_key = os.environ.get("OPENAI_API_KEY", "dummy_key_for_validation")
 
     client = OpenAI(api_key=api_key)
     tasks  = ["bug_detection", "security_audit", "architecture_review"]
