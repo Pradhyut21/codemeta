@@ -142,7 +142,7 @@ def main():
     api_key = os.environ.get("OPENAI_API_KEY", "")
     if not api_key:
         print("ERROR: Set OPENAI_API_KEY environment variable.", file=sys.stderr)
-        sys.exit(1)
+        return
 
     client = OpenAI(api_key=api_key)
     tasks  = ["bug_detection", "security_audit", "architecture_review"]
